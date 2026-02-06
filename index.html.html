@@ -1,0 +1,3478 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle Oyunu - ŞƏXSi KABİNET + ADMIN ŞƏKİL İDARƏETMƏSİ</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        :root {
+            --primary-color: #0b5fff; /* professional blue */
+            --secondary-color: #0ea5a4; /* subtle accent */
+            --accent-color: #0ea5a4;
+            --pause-color: #ff6b35;
+            --admin-color: #0b5fff;
+            --danger-color: #dc2626;
+            --warning-color: #f59e0b;
+            --text-color: #0f172a;
+            --light-gray: #f7f8fb;
+            --white: #ffffff;
+            --shadow: 0 6px 18px rgba(16,24,40,0.06);
+            --overlay-bg: rgba(0, 0, 0, 0.6);
+            --male-color: #2563eb;
+            --female-color: #db2777;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            min-height: 100vh;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .container {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            min-height: calc(100vh - 40px);
+        }
+        
+        .sidebar {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            width: 250px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .sidebar h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .game-area {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            flex-grow: 1;
+            position: relative;
+            min-height: 500px;
+        }
+        
+        .logout-btn, .admin-btn {
+            position: absolute;
+            top: 20px;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            border: none;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn {
+            left: 20px;
+            background: none;
+            color: var(--primary-color);
+            display: none;
+        }
+        
+        .admin-btn {
+            right: 20px;
+            background-color: var(--admin-color);
+            color: white;
+            display: none;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        th {
+            background-color: #f7f7f7;
+            font-weight: 600;
+        }
+        
+        .user-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .user-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: var(--light-gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 12px;
+            overflow: hidden;
+        }
+        
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .puzzle-simple-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .puzzle-board-simple {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 0;
+            width: 300px;
+            height: 200px;
+            border: 3px solid var(--primary-color);
+            border-radius: 5px;
+            overflow: hidden;
+            background: #fff;
+            position: relative;
+        }
+        
+        .puzzle-piece-simple {
+            width: 100px;
+            height: 100px;
+            cursor: pointer;
+            overflow: hidden;
+            border: 1px solid #ddd;
+            transition: transform 0.2s;
+            background-size: 300px 200px;
+            background-position: 0 0;
+        }
+        
+        .puzzle-piece-simple:hover {
+            transform: scale(1.03);
+            z-index: 1;
+            border-color: var(--accent-color);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .gender-options {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        
+        .gender-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .gender-radio {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .gender-male {
+            color: var(--male-color);
+        }
+        
+        .gender-female {
+            color: var(--female-color);
+        }
+        
+        .submit-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        
+        .submit-btn:hover {
+            background-color: #36a420;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #166fe5;
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #36a420;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: #333;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .btn-admin {
+            background-color: var(--admin-color);
+            color: white;
+        }
+        
+        .btn-admin:hover {
+            background-color: #7b1fa2;
+        }
+        
+        .btn-disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin: 20px 0;
+            font-size: 18px;
+            flex-wrap: wrap;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--overlay-bg);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background-color: var(--white);
+            padding: 25px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+        
+        .modal-wide {
+            max-width: 800px;
+        }
+        
+        .modal-extra-wide {
+            max-width: 900px;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            background: none;
+            border: none;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .status-message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .status-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .admin-panel {
+            background-color: #f8f9fa;
+            border: 2px solid var(--admin-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .admin-panel h2 {
+            color: var(--admin-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid var(--admin-color);
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--admin-color);
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .admin-table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        .admin-table th {
+            background-color: var(--admin-color);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .admin-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .admin-table tr:hover {
+            background-color: #f1f1f1;
+        }
+        
+        .admin-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-btn {
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 3px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .profile-container {
+            text-align: center;
+            padding-top: 20px;
+        }
+        
+        .avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-color: var(--light-gray);
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 4px solid var(--primary-color);
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .change-avatar-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .progress-bar {
+            height: 20px;
+            background-color: var(--secondary-color);
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        .daily-limit-info {
+            background-color: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .api-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .rank-badge {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #ffd700;
+            color: #333;
+            text-align: center;
+            line-height: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 5px;
+        }
+        
+        .user-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .gender-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .gender-badge.male {
+            background-color: var(--male-color);
+            color: white;
+        }
+        
+        .gender-badge.female {
+            background-color: var(--female-color);
+            color: white;
+        }
+        
+        .profile-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: var(--shadow);
+        }
+        
+        .profile-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f2f5;
+        }
+        
+        .avatar-upload-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .avatar-preview {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            overflow: hidden;
+            border: 4px solid var(--primary-color);
+        }
+        
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .upload-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: var(--secondary-color);
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        /* Puzzle Images Admin Styles */
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .image-item {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .image-item:hover {
+            border-color: var(--admin-color);
+            box-shadow: var(--shadow);
+        }
+        
+        .image-preview {
+            width: 100%;
+            height: 120px;
+            overflow: hidden;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-info {
+            padding: 10px;
+            background: white;
+        }
+        
+        .image-url {
+            font-size: 11px;
+            color: #666;
+            word-break: break-all;
+            margin-top: 5px;
+        }
+        
+        .image-actions {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .image-btn {
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        .image-btn-edit {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .image-btn-delete {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        .image-btn-move {
+            background: var(--warning-color);
+            color: #333;
+        }
+        
+        .drag-handle {
+            cursor: move;
+            padding: 5px;
+            background: #f8f9fa;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .admin-tab {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .admin-tab.active {
+            background: var(--admin-color);
+            color: white;
+        }
+        
+        .admin-tab:hover:not(.active) {
+            background: #e9ecef;
+        }
+        
+        .admin-tab-content {
+            display: none;
+        }
+        
+        .admin-tab-content.active {
+            display: block;
+        }
+        
+        .add-image-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .url-preview {
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        
+        .url-preview img {
+            max-width: 100%;
+            max-height: 60px;
+            display: block;
+            margin: 5px auto;
+        }
+        
+        .drag-over {
+            border-color: var(--admin-color) !important;
+            background-color: rgba(138, 43, 226, 0.1) !important;
+        }
+        
+        /* Yeni əlavə edilən CSS */
+        .original-image-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .original-image {
+            max-width: 300px;
+            max-height: 200px;
+            border: 3px solid var(--primary-color);
+            border-radius: 5px;
+            box-shadow: var(--shadow);
+        }
+        
+        .success-message {
+            text-align: center;
+            padding: 15px;
+            margin: 15px 0;
+            background-color: #d4edda;
+            color: #155724;
+            border-radius: 5px;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .game-screen {
+            width: 100%;
+        }
+        
+        #nextResetDisplay {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .sidebar {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+            
+            .game-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .puzzle-board-simple {
+                width: 240px;
+                height: 160px;
+            }
+            
+            .puzzle-piece-simple {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .user-details-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .images-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .admin-tabs {
+                flex-wrap: wrap;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .puzzle-board-simple {
+                width: 180px;
+                height: 120px;
+            }
+            
+            .puzzle-piece-simple {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .game-info {
+                font-size: 14px;
+            }
+            
+            .controls button {
+                font-size: 14px;
+                padding: 8px 12px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .avatar-preview {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .images-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-wide, .modal-extra-wide {
+                width: 95%;
+                padding: 15px;
+            }
+        }
+    </style>
+    <!-- Firebase SDK (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Sol tərəf: Reytinq cədvəli -->
+        <div class="sidebar">
+            <h3>🎮 Günlük Reytinq</h3>
+            <div style="margin-bottom:10px; font-size:12px; color:#666;">
+                ⏱️ <span id="nextResetTime">00:00:00</span>
+                <button id="refreshRatingBtn" style="padding:3px 8px;font-size:11px;float:right;">🔄</button>
+            </div>
+            <table id="ratingTable">
+                <thead>
+                    <tr>
+                        <th>Yer</th>
+                        <th>İstifadəçi</th>
+                        <th>Xal</th>
+                    </tr>
+                </thead>
+                <tbody id="ratingBody">
+                    <!-- Buraya reytinq məlumatları yüklənəcək -->
+                </tbody>
+            </table>
+            <div style="margin-top:10px; font-size:11px; color:#999; text-align:center;">
+                ⭐ Günlük xallar gecə 00:00-da sıfırlanır
+            </div>
+        </div>
+
+        <!-- Mərkəz: Oyun sahəsi -->
+        <div class="game-area">
+            <button class="logout-btn" id="logoutBtn">← Çıxış</button>
+            <button class="admin-btn" id="adminBtn">⚙️ Admin</button>
+            
+            <div id="formContent">
+                <!-- Məzmun burada yüklənəcək -->
+                <div style="text-align:center; padding:50px 20px;">
+                    <h1>🎮 Puzzle Oyun Platforması</h1>
+                    <p style="color:#666; margin:20px 0;">Yüklənir...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sağ tərəf: Online istifadəçilər -->
+        <div class="sidebar">
+            <h3>👥 Online İstifadəçilər (<span id="onlineCount">0</span>)</h3>
+            <div style="margin-bottom:10px; font-size:12px; color:#666;">
+                <span id="lastUpdate">--:--</span>
+                <button id="refreshOnlineBtn" style="padding:3px 8px;font-size:11px;float:right;">🔄</button>
+            </div>
+            <ul class="user-list" id="userList">
+                <!-- Buraya online istifadəçilər yüklənəcək -->
+            </ul>
+            <div style="margin-top:10px; font-size:11px; color:#999; text-align:center;">
+                👁️ Yalnız online istifadəçilər görünür
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Modal -->
+    <div class="modal" id="adminModal">
+        <div class="modal-content modal-extra-wide">
+            <button class="close-modal" id="closeAdminModalBtn">×</button>
+            <h2>⚙️ Admin Panel</h2>
+            <div id="adminModalContent">
+                <!-- Admin məzmunu burada yüklənəcək -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Avatar Upload Modal -->
+    <div class="modal" id="avatarModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeAvatarModalBtn">×</button>
+            <h2>📷 Profil Şəklini Dəyişdir</h2>
+            <div id="avatarModalContent">
+                <div class="avatar-upload-container">
+                    <div class="avatar-preview" id="avatarPreview">
+                        <img id="previewImage" src="" alt="Preview">
+                    </div>
+                    <input type="file" id="avatarInput" accept="image/*" style="display:none;">
+                    <label for="avatarInput" class="upload-btn">🖼️ Şəkil Seç</label>
+                    <div style="margin-top:15px;">
+                        <button id="saveAvatarBtn" class="submit-btn" disabled>💾 Saxla</button>
+                        <button id="cancelAvatarBtn" class="btn-primary" style="margin-top:10px; background:#6c757d;">❌ Ləğv et</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Image Modal -->
+    <div class="modal" id="editImageModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeEditImageModalBtn">×</button>
+            <h2>🖼️ Puzzle Şəklini Redaktə Et</h2>
+            <div id="editImageModalContent">
+                <!-- Şəkil redaktə məzmunu burada yüklənəcək -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===================== KONSTANTLAR VƏ KONFİQURASİYA =====================
+        const CONFIG = {
+            PUZZLE: {
+                TOTAL_PUZZLES: 5,
+                DEFAULT_IMAGES: [
+                    "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=300&h=200&fit=crop",
+                    "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=300&h=200&fit=crop",
+                    "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=300&h=200&fit=crop",
+                    "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=300&h=200&fit=crop",
+                    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=200&fit=crop"
+                ]
+            },
+            
+            GAME: {
+                BASE_POINTS: 100,
+                TIME_BONUS_MULTIPLIER: 5,
+                MOVES_BONUS_MULTIPLIER: 3,
+                MAX_TIME_BONUS: 300,
+                MAX_MOVES_BONUS: 200
+            },
+            
+            STORAGE_KEYS: {
+                USERS: 'puzzle_users_v2',
+                CURRENT_USER: 'puzzle_current_user',
+                DAILY_ATTEMPTS: 'puzzle_daily_attempts',
+                ALL_TIME_POINTS: 'puzzle_all_time_points',
+                PUZZLE_IMAGES: 'puzzle_images_v2'
+            }
+        };
+
+        // ===================== OPTIONAL FIREBASE SERVICE =====================
+        class FirebaseService {
+            constructor() {
+                this.enabled = false;
+                this.app = null;
+                this.usersRef = null;
+                this.imagesRef = null;
+                this.presenceRef = null;
+            }
+
+            init(config) {
+                if (!config) return false;
+                try {
+                    if (!firebase.apps.length) {
+                        this.app = firebase.initializeApp(config);
+                    } else {
+                        this.app = firebase.app();
+                    }
+
+                    this.usersRef = firebase.database().ref('users');
+                    this.imagesRef = firebase.database().ref('puzzleImages');
+                    this.presenceRef = firebase.database().ref('presence');
+                    this.enabled = true;
+                    console.log('✅ Firebase initialized');
+                    return true;
+                } catch (error) {
+                    console.error('Firebase init error:', error);
+                    return false;
+                }
+            }
+
+            listenLeaderboard(onUpdate) {
+                if (!this.enabled) return;
+                this.usersRef.on('value', snapshot => {
+                    const users = [];
+                    snapshot.forEach(child => {
+                        const u = child.val();
+                        users.push({ id: child.key, ...u });
+                    });
+                    onUpdate(users);
+                });
+            }
+
+            listenPresence(onUpdate) {
+                if (!this.enabled) return;
+                this.presenceRef.on('value', snapshot => {
+                    const online = [];
+                    snapshot.forEach(child => {
+                        online.push(child.key);
+                    });
+                    onUpdate(online);
+                });
+            }
+
+            setUserOnline(userId, payload = {}) {
+                if (!this.enabled) return;
+                this.usersRef.child(userId).update(payload);
+                const pRef = this.presenceRef.child(userId);
+                pRef.set(true);
+                pRef.onDisconnect().remove();
+            }
+
+            updateUser(userId, payload = {}) {
+                if (!this.enabled) return;
+                this.usersRef.child(userId).update(payload);
+            }
+
+            addPuzzleImage(imageObj) {
+                if (!this.enabled) return { success: false, error: 'Firebase not initialized' };
+                const newRef = this.imagesRef.push(imageObj);
+                return { success: true, id: newRef.key };
+            }
+
+            updatePuzzleImage(imageId, data) {
+                if (!this.enabled) return { success: false, error: 'Firebase not initialized' };
+                this.imagesRef.child(imageId).update(data);
+                return { success: true };
+            }
+
+            deletePuzzleImage(imageId) {
+                if (!this.enabled) return { success: false, error: 'Firebase not initialized' };
+                this.imagesRef.child(imageId).remove();
+                return { success: true };
+            }
+        }
+
+        // ===================== VERİLƏNLƏR BAZASI =====================
+        class Database {
+            constructor() {
+                this.users = this.loadData(CONFIG.STORAGE_KEYS.USERS, []);
+                this.allTimePoints = this.loadData(CONFIG.STORAGE_KEYS.ALL_TIME_POINTS, {});
+                this.puzzleImages = this.loadPuzzleImages();
+                
+                if (this.users.length === 0) {
+                    this.createTestUsers();
+                }
+            }
+            
+            loadPuzzleImages() {
+                const savedImages = this.loadData(CONFIG.STORAGE_KEYS.PUZZLE_IMAGES, []);
+                
+                if (savedImages.length === 0) {
+                    return CONFIG.PUZZLE.DEFAULT_IMAGES.map((url, index) => ({
+                        id: `img_${Date.now()}_${index}`,
+                        url: url,
+                        order: index,
+                        isDefault: true,
+                        addedDate: new Date().toISOString()
+                    }));
+                }
+                
+                return savedImages;
+            }
+            
+            createTestUsers() {
+                const testUsers = [
+                    {
+                        id: 'USER_admin_123',
+                        firstName: 'Admin',
+                        lastName: 'User',
+                        email: 'admin@example.com',
+                        password: 'admin123',
+                        totalPoints: 1500,
+                        dailyPoints: 300,
+                        registrationDate: new Date().toISOString(),
+                        lastLogin: new Date().toISOString(),
+                        isOnline: true,
+                        isActive: true,
+                        isAdmin: true,
+                        avatar: null,
+                        gender: 'male',
+                        birthDate: '1985-05-15',
+                        phoneNumber: '+994501234567'
+                    },
+                    {
+                        id: 'USER_test_456',
+                        firstName: 'Test',
+                        lastName: 'User 1',
+                        email: 'test1@example.com',
+                        password: 'test123',
+                        totalPoints: 800,
+                        dailyPoints: 150,
+                        registrationDate: new Date().toISOString(),
+                        lastLogin: new Date().toISOString(),
+                        isOnline: true,
+                        isActive: true,
+                        isAdmin: false,
+                        avatar: null,
+                        gender: 'female',
+                        birthDate: '1990-08-20',
+                        phoneNumber: '+994551234567'
+                    },
+                    {
+                        id: 'USER_test_789',
+                        firstName: 'Test',
+                        lastName: 'User 2',
+                        email: 'test2@example.com',
+                        password: 'test123',
+                        totalPoints: 500,
+                        dailyPoints: 75,
+                        registrationDate: new Date().toISOString(),
+                        lastLogin: new Date().toISOString(),
+                        isOnline: false,
+                        isActive: true,
+                        isAdmin: false,
+                        avatar: null,
+                        gender: 'male',
+                        birthDate: '1995-12-10',
+                        phoneNumber: '+994701234567'
+                    }
+                ];
+                
+                this.users = testUsers;
+                this.saveData(CONFIG.STORAGE_KEYS.USERS, this.users);
+                
+                testUsers.forEach(user => {
+                    this.allTimePoints[user.id] = (this.allTimePoints[user.id] || 0) + user.totalPoints;
+                });
+                this.saveData(CONFIG.STORAGE_KEYS.ALL_TIME_POINTS, this.allTimePoints);
+            }
+            
+            loadData(key, defaultValue) {
+                try {
+                    const data = localStorage.getItem(key);
+                    return data ? JSON.parse(data) : defaultValue;
+                } catch (error) {
+                    console.error(`Error loading ${key}:`, error);
+                    return defaultValue;
+                }
+            }
+            
+            saveData(key, data) {
+                try {
+                    const toStore = (typeof data === 'string') ? data : JSON.stringify(data);
+                    localStorage.setItem(key, toStore);
+                    return true;
+                } catch (error) {
+                    console.error(`Error saving ${key}:`, error);
+                    return false;
+                }
+            }
+            
+            // ===================== PUZZLE ŞƏKİLLƏRİ ƏMƏLİYYATLARI =====================
+            getPuzzleImages() {
+                return [...this.puzzleImages].sort((a, b) => a.order - b.order);
+            }
+            
+            addPuzzleImage(imageUrl) {
+                if (!this.isValidImageUrl(imageUrl)) {
+                    return { success: false, error: 'Şəkil URL-i düzgün deyil' };
+                }
+                
+                const newImage = {
+                    id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    url: imageUrl,
+                    order: this.puzzleImages.length,
+                    isDefault: false,
+                    addedDate: new Date().toISOString()
+                };
+                
+                this.puzzleImages.push(newImage);
+                const saved = this.saveData(CONFIG.STORAGE_KEYS.PUZZLE_IMAGES, this.puzzleImages);
+                
+                if (!saved) {
+                    return { success: false, error: 'Şəkil əlavə edilə bilmədi' };
+                }
+                
+                return { success: true, image: newImage };
+            }
+            
+            updatePuzzleImage(imageId, newUrl) {
+                if (!this.isValidImageUrl(newUrl)) {
+                    return { success: false, error: 'Şəkil URL-i düzgün deyil' };
+                }
+                
+                const imageIndex = this.puzzleImages.findIndex(img => img.id === imageId);
+                if (imageIndex === -1) {
+                    return { success: false, error: 'Şəkil tapılmadı' };
+                }
+                
+                this.puzzleImages[imageIndex].url = newUrl;
+                const saved = this.saveData(CONFIG.STORAGE_KEYS.PUZZLE_IMAGES, this.puzzleImages);
+                
+                if (!saved) {
+                    return { success: false, error: 'Şəkil yenilənə bilmədi' };
+                }
+                
+                return { success: true, image: this.puzzleImages[imageIndex] };
+            }
+            
+            deletePuzzleImage(imageId) {
+                const imageIndex = this.puzzleImages.findIndex(img => img.id === imageId);
+                if (imageIndex === -1) {
+                    return { success: false, error: 'Şəkil tapılmadı' };
+                }
+                
+                if (this.puzzleImages[imageIndex].isDefault) {
+                    return { success: false, error: 'Default şəkili silmək olmaz' };
+                }
+                
+                this.puzzleImages.splice(imageIndex, 1);
+                
+                this.puzzleImages.forEach((img, index) => {
+                    img.order = index;
+                });
+                
+                const saved = this.saveData(CONFIG.STORAGE_KEYS.PUZZLE_IMAGES, this.puzzleImages);
+                
+                if (!saved) {
+                    return { success: false, error: 'Şəkil silinə bilmədi' };
+                }
+                
+                return { success: true };
+            }
+            
+            reorderPuzzleImages(imageIds) {
+                const newOrder = {};
+                imageIds.forEach((id, index) => {
+                    newOrder[id] = index;
+                });
+                
+                this.puzzleImages.forEach(img => {
+                    if (newOrder[img.id] !== undefined) {
+                        img.order = newOrder[img.id];
+                    }
+                });
+                
+                this.puzzleImages.sort((a, b) => a.order - b.order);
+                
+                const saved = this.saveData(CONFIG.STORAGE_KEYS.PUZZLE_IMAGES, this.puzzleImages);
+                
+                if (!saved) {
+                    return { success: false, error: 'Şəkillər sıralana bilmədi' };
+                }
+                
+                return { success: true };
+            }
+            
+            isValidImageUrl(url) {
+                try {
+                    const parsedUrl = new URL(url);
+                    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+                        return false;
+                    }
+                    
+                    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
+                    const hasImageExtension = imageExtensions.some(ext => 
+                        parsedUrl.pathname.toLowerCase().endsWith(ext)
+                    );
+                    
+                    return hasImageExtension;
+                } catch (error) {
+                    return false;
+                }
+            }
+            
+            resetToDefaultImages() {
+                this.puzzleImages = CONFIG.PUZZLE.DEFAULT_IMAGES.map((url, index) => ({
+                    id: `img_default_${index}`,
+                    url: url,
+                    order: index,
+                    isDefault: true,
+                    addedDate: new Date().toISOString()
+                }));
+                
+                const saved = this.saveData(CONFIG.STORAGE_KEYS.PUZZLE_IMAGES, this.puzzleImages);
+                return { success: saved };
+            }
+            
+            // ===================== İSTİFADƏÇİ ƏMƏLİYYATLARI =====================
+            register(userData) {
+                const existingUser = this.users.find(u => u.email === userData.email);
+                if (existingUser) {
+                    return { success: false, error: 'Bu email artıq qeydiyyatdan keçib' };
+                }
+                
+                const user = {
+                    id: 'USER_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    ...userData,
+                    totalPoints: 0,
+                    dailyPoints: 0,
+                    registrationDate: new Date().toISOString(),
+                    lastLogin: new Date().toISOString(),
+                    isOnline: true,
+                    isActive: true,
+                    isAdmin: userData.email.includes('admin@') || false,
+                    avatar: userData.avatar || null,
+                    gender: userData.gender || 'male',
+                    birthDate: userData.birthDate || null,
+                    phoneNumber: userData.phoneNumber || ''
+                };
+                
+                this.users.push(user);
+                const saved = this.saveData(CONFIG.STORAGE_KEYS.USERS, this.users);
+                
+                if (!saved) {
+                    return { success: false, error: 'Məlumatlar saxlanıla bilmədi' };
+                }
+                
+                return { success: true, user };
+            }
+            
+            login(email, password) {
+                const user = this.users.find(u => 
+                    u.email === email && 
+                    u.password === password && 
+                    u.isActive !== false
+                );
+                
+                if (user) {
+                    user.lastLogin = new Date().toISOString();
+                    user.isOnline = true;
+                    const saved = this.saveData(CONFIG.STORAGE_KEYS.USERS, this.users);
+                    
+                    if (!saved) {
+                        return { success: false, error: 'Giriş məlumatları saxlanıla bilmədi' };
+                    }
+                    
+                    return { success: true, user };
+                }
+                
+                return { success: false, error: 'Email və ya şifrə yanlışdır' };
+            }
+            
+            getAllUsers() {
+                return this.users.map(user => ({
+                    id: user.id,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    email: user.email,
+                    avatar: user.avatar,
+                    totalPoints: user.totalPoints || 0,
+                    dailyPoints: user.dailyPoints || 0,
+                    registrationDate: user.registrationDate,
+                    lastLogin: user.lastLogin || user.registrationDate,
+                    isAdmin: user.isAdmin || false,
+                    isActive: user.isActive !== false,
+                    gender: user.gender || 'male',
+                    birthDate: user.birthDate || null,
+                    phoneNumber: user.phoneNumber || ''
+                }));
+            }
+            
+            getDailyRating() {
+                return this.users
+                    .filter(user => user.isActive !== false)
+                    .map(user => ({
+                        id: user.id,
+                        firstName: user.firstName,
+                        lastName: user.lastName,
+                        avatar: user.avatar,
+                        dailyPoints: user.dailyPoints || 0,
+                        totalPoints: user.totalPoints || 0,
+                        gender: user.gender || 'male'
+                    }))
+                    .sort((a, b) => b.dailyPoints - a.dailyPoints);
+            }
+            
+            updatePoints(userId, points) {
+                const user = this.users.find(u => u.id === userId);
+                if (user) {
+                    user.totalPoints = (user.totalPoints || 0) + points;
+                    user.dailyPoints = (user.dailyPoints || 0) + points;
+                    
+                    this.allTimePoints[userId] = (this.allTimePoints[userId] || 0) + points;
+                    this.saveData(CONFIG.STORAGE_KEYS.ALL_TIME_POINTS, this.allTimePoints);
+                    
+                    const saved = this.saveData(CONFIG.STORAGE_KEYS.USERS, this.users);
+                    return { success: saved };
+                }
+                return { success: false };
+            }
+            
+            getOnlineUsers() {
+                return this.users.filter(user => 
+                    user.isOnline === true && 
+                    user.isActive !== false
+                );
+            }
+            
+            resetDailyPoints() {
+                this.users.forEach(user => {
+                    user.dailyPoints = 0;
+                });
+                
+                const saved = this.saveData(CONFIG.STORAGE_KEYS.USERS, this.users);
+                return { success: saved };
+            }
+            
+            getUserStats(userId) {
+                const user = this.users.find(u => u.id === userId);
+                if (!user) return null;
+                
+                return {
+                    dailyPoints: user.dailyPoints || 0,
+                    totalPoints: user.totalPoints || 0,
+                    allTimePoints: this.allTimePoints[userId] || 0
+                };
+            }
+            
+            updateUserProfile(userId, updateData) {
+                const user = this.users.find(u => u.id === userId);
+                if (!user) {
+                    return { success: false, error: 'İstifadəçi tapılmadı' };
+                }
+                
+                Object.keys(updateData).forEach(key => {
+                    if (key !== 'id' && key !== 'password') {
+                        user[key] = updateData[key];
+                    }
+                });
+                
+                const saved = this.saveData(CONFIG.STORAGE_KEYS.USERS, this.users);
+                if (!saved) {
+                    return { success: false, error: 'Profil məlumatları saxlanıla bilmədi' };
+                }
+                
+                return { success: true, user };
+            }
+            
+            updateAvatar(userId, avatarData) {
+                const user = this.users.find(u => u.id === userId);
+                if (!user) {
+                    return { success: false, error: 'İstifadəçi tapılmadı' };
+                }
+                
+                user.avatar = avatarData;
+                const saved = this.saveData(CONFIG.STORAGE_KEYS.USERS, this.users);
+                
+                if (!saved) {
+                    return { success: false, error: 'Avatar saxlanıla bilmədi' };
+                }
+                
+                return { success: true, user };
+            }
+        }
+
+        // ===================== ƏSAS TƏTBİQ =====================
+        class PuzzleGameApp {
+            constructor() {
+                this.db = new Database();
+                this.currentUser = null;
+                this.dailyAttempts = this.loadData(CONFIG.STORAGE_KEYS.DAILY_ATTEMPTS, {});
+                this.resetTimer = null;
+                this.selectedAvatar = null;
+                this.currentAdminTab = 'dashboard';
+                this.draggedImage = null;
+                this.firebase = new FirebaseService();
+                
+                this.init();
+            }
+            
+            loadData(key, defaultValue) {
+                try {
+                    const data = localStorage.getItem(key);
+                    return data ? JSON.parse(data) : defaultValue;
+                } catch (error) {
+                    console.error(`Error loading ${key}:`, error);
+                    return defaultValue;
+                }
+            }
+            
+            saveData(key, data) {
+                try {
+                    const toStore = (typeof data === 'string') ? data : JSON.stringify(data);
+                    localStorage.setItem(key, toStore);
+                    return true;
+                } catch (error) {
+                    console.error(`Error saving ${key}:`, error);
+                    return false;
+                }
+            }
+            
+            init() {
+                this.loadCurrentUser();
+                // If the page sets window.FIREBASE_CONFIG object, initialize Firebase
+                try {
+                    if (window.FIREBASE_CONFIG) {
+                        const ok = this.firebase.init(window.FIREBASE_CONFIG);
+                        if (ok) {
+                            // listen leaderboard and presence updates from Firebase
+                            this.firebase.listenLeaderboard((users) => {
+                                // Map Firebase users to local db.users format
+                                this.db.users = users.map(u => ({
+                                    id: u.id,
+                                    firstName: u.firstName || u.displayName || 'İstifadəçi',
+                                    lastName: u.lastName || '',
+                                    email: u.email || '',
+                                    avatar: u.avatar || null,
+                                    totalPoints: u.totalPoints || 0,
+                                    dailyPoints: u.dailyPoints || 0,
+                                    registrationDate: u.registrationDate || new Date().toISOString(),
+                                    lastLogin: u.lastLogin || new Date().toISOString(),
+                                    isAdmin: u.isAdmin || false,
+                                    isActive: u.isActive !== false,
+                                    gender: u.gender || 'male',
+                                    birthDate: u.birthDate || null,
+                                    phoneNumber: u.phoneNumber || ''
+                                }));
+                                this.updateDailyRatingTable();
+                                this.updateOnlineUsers();
+                            });
+
+                            this.firebase.listenPresence((onlineIds) => {
+                                // mark users online based on presence list
+                                this.db.users.forEach(u => u.isOnline = onlineIds.includes(u.id));
+                                this.updateOnlineUsers();
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.warn('Firebase init skipped or failed:', error);
+                }
+                this.setupEventListeners();
+                
+                if (this.currentUser) {
+                    this.showMainMenu();
+                } else {
+                    this.showWelcomeScreen();
+                }
+                
+                this.updateDailyRatingTable();
+                this.updateOnlineUsers();
+                this.startResetTimer();
+                
+                setInterval(() => this.updateOnlineUsers(), 30000);
+                setInterval(() => this.updateDailyRatingTable(), 60000);
+                setInterval(() => this.checkDailyReset(), 60000);
+            }
+            
+            setupEventListeners() {
+                document.getElementById('adminBtn').addEventListener('click', () => this.showAdminPanel());
+                document.getElementById('logoutBtn').addEventListener('click', () => this.logout());
+                document.getElementById('refreshRatingBtn').addEventListener('click', () => this.refreshRating());
+                document.getElementById('refreshOnlineBtn').addEventListener('click', () => this.refreshOnlineUsers());
+                document.getElementById('closeAdminModalBtn').addEventListener('click', () => this.closeAdminModal());
+                document.getElementById('closeAvatarModalBtn').addEventListener('click', () => this.closeAvatarModal());
+                document.getElementById('cancelAvatarBtn').addEventListener('click', () => this.closeAvatarModal());
+                document.getElementById('closeEditImageModalBtn').addEventListener('click', () => this.closeEditImageModal());
+                
+                document.getElementById('adminModal').addEventListener('click', (e) => {
+                    if (e.target === document.getElementById('adminModal')) {
+                        this.closeAdminModal();
+                    }
+                });
+                
+                document.getElementById('avatarModal').addEventListener('click', (e) => {
+                    if (e.target === document.getElementById('avatarModal')) {
+                        this.closeAvatarModal();
+                    }
+                });
+                
+                document.getElementById('editImageModal').addEventListener('click', (e) => {
+                    if (e.target === document.getElementById('editImageModal')) {
+                        this.closeEditImageModal();
+                    }
+                });
+                
+                document.getElementById('avatarInput').addEventListener('change', (e) => this.handleAvatarSelect(e));
+                document.getElementById('saveAvatarBtn').addEventListener('click', () => this.saveAvatar());
+            }
+            
+            loadCurrentUser() {
+                try {
+                    const savedUser = localStorage.getItem(CONFIG.STORAGE_KEYS.CURRENT_USER);
+                    if (savedUser) {
+                        this.currentUser = JSON.parse(savedUser);
+                    }
+                } catch (error) {
+                    console.error('Error loading current user:', error);
+                    this.currentUser = null;
+                }
+            }
+            
+            // ===================== EKRANLAR =====================
+            showWelcomeScreen() {
+                const html = `
+                    <h1>🎮 Puzzle Oyun Platforması</h1>
+                    <div class="status-message status-info">
+                        🌟 Günlük reytinq | ⏰ 00:00-da sıfırlanır | 👁️ Hamı görür
+                    </div>
+                    
+                    <div style="text-align:center; margin:40px 0;">
+                        <button id="registerBtn" class="submit-btn" style="width:80%; margin-bottom:15px;">
+                            👤 Yeni İstifadəçi
+                        </button>
+                        <button id="loginBtn" class="submit-btn" style="width:80%;">
+                            🔑 Mövcud İstifadəçi
+                        </button>
+                    </div>
+                    
+                    <div style="text-align:center; margin-top:30px; color:#666; padding:15px; background:#f8f9fa; border-radius:8px;">
+                        <p>🔥 <strong>XÜSUSİYYƏTLƏR:</strong></p>
+                        <p>• 🧩 5 Puzzle-lıq gündəlik oyun</p>
+                        <p>• 📊 Günlük reytinq cədvəli</p>
+                        <p>• 👤 Tam şəxsi kabinet</p>
+                        <p>• 👥 Online istifadəçilər</p>
+                        <p>• ⭐ Günlük xallar (gecə 00:00-da sıfırlanır)</p>
+                    </div>
+                `;
+                
+                this.updateFormContent(html);
+                
+                setTimeout(() => {
+                    document.getElementById('registerBtn').addEventListener('click', () => this.showRegistrationForm());
+                    document.getElementById('loginBtn').addEventListener('click', () => this.showLoginForm());
+                }, 100);
+            }
+            
+            showRegistrationForm() {
+                const html = `
+                    <h1>👤 Yeni Hesab Yarat</h1>
+                    
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label for="firstName">Ad *</label>
+                            <input type="text" id="firstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Soyad *</label>
+                            <input type="text" id="lastName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">E-poçt *</label>
+                            <input type="email" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Şifrə *</label>
+                            <input type="password" id="password" required minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Şifrəni təsdiq et *</label>
+                            <input type="password" id="confirmPassword" required minlength="6">
+                        </div>
+                        
+                        <div class="profile-section">
+                            <h3>📋 Şəxsi Məlumatlar</h3>
+                            <div class="form-group">
+                                <label for="gender">Cinsiyyət *</label>
+                                <div class="gender-options">
+                                    <label class="gender-option gender-male">
+                                        <input type="radio" name="gender" value="male" class="gender-radio" checked>
+                                        Kişi 👨
+                                    </label>
+                                    <label class="gender-option gender-female">
+                                        <input type="radio" name="gender" value="female" class="gender-radio">
+                                        Qadın 👩
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="birthDate">Doğum tarixi *</label>
+                                <input type="date" id="birthDate" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="phoneNumber">Mobil nömrə *</label>
+                                <input type="tel" id="phoneNumber" required pattern="[+]{1}[0-9]{12}" 
+                                       placeholder="+994501234567">
+                                <small style="color:#666;">Format: +994501234567</small>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="submit-btn">✅ Hesab Yarat</button>
+                        <button type="button" id="backToWelcomeBtn" style="width:100%;margin-top:10px;background:#6c757d;">
+                            ← Geri Qayıt
+                        </button>
+                    </form>
+                `;
+                
+                this.updateFormContent(html);
+                
+                setTimeout(() => {
+                    const today = new Date();
+                    const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
+                    const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+                    
+                    document.getElementById('birthDate').min = minDate.toISOString().split('T')[0];
+                    document.getElementById('birthDate').max = maxDate.toISOString().split('T')[0];
+                    document.getElementById('birthDate').value = maxDate.toISOString().split('T')[0];
+                    
+                    document.getElementById('registerForm').addEventListener('submit', (e) => this.handleRegistration(e));
+                    document.getElementById('backToWelcomeBtn').addEventListener('click', () => this.showWelcomeScreen());
+                }, 100);
+            }
+            
+            showLoginForm() {
+                const html = `
+                    <h1>🔑 Hesabınıza Daxil Olun</h1>
+                    
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="loginEmail">E-poçt</label>
+                            <input type="email" id="loginEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Şifrə</label>
+                            <input type="password" id="loginPassword" required>
+                        </div>
+                        
+                        <button type="submit" class="submit-btn">🔐 Daxil Ol</button>
+                        
+                        <div id="loginError" class="status-message" style="display:none; margin-top:15px;"></div>
+                        
+                        <button type="button" id="backToWelcomeBtn2" style="width:100%;margin-top:10px;background:#6c757d;">
+                            ← Geri Qayıt
+                        </button>
+                    </form>
+                    
+                    <div style="margin-top:30px; padding:15px; background:#f8f9fa; border-radius:8px;">
+                        <h3>📋 Test Hesabları</h3>
+                        <div style="margin-top:10px;">
+                            <p><strong>Admin:</strong> admin@example.com / admin123</p>
+                            <p><strong>Test 1:</strong> test1@example.com / test123</p>
+                            <p><strong>Test 2:</strong> test2@example.com / test123</p>
+                        </div>
+                    </div>
+                `;
+                
+                this.updateFormContent(html);
+                
+                setTimeout(() => {
+                    document.getElementById('loginForm').addEventListener('submit', (e) => this.handleLogin(e));
+                    document.getElementById('backToWelcomeBtn2').addEventListener('click', () => this.showWelcomeScreen());
+                }, 100);
+            }
+            
+            // ===================== İSTİFADƏÇİ ƏMƏLİYYATLARI =====================
+            handleRegistration(e) {
+                e.preventDefault();
+                
+                const firstName = document.getElementById('firstName').value;
+                const lastName = document.getElementById('lastName').value;
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const gender = document.querySelector('input[name="gender"]:checked').value;
+                const birthDate = document.getElementById('birthDate').value;
+                const phoneNumber = document.getElementById('phoneNumber').value;
+                
+                if (password !== confirmPassword) {
+                    this.showMessage('❌ Şifrələr eyni deyil!', 'error');
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    this.showMessage('❌ Şifrə ən azı 6 simvol olmalıdır!', 'error');
+                    return;
+                }
+                
+                if (!phoneNumber.match(/^\+994[0-9]{9}$/)) {
+                    this.showMessage('❌ Mobil nömrə formatı düzgün deyil! (+994501234567)', 'error');
+                    return;
+                }
+                
+                try {
+                    const result = this.db.register({
+                        firstName,
+                        lastName,
+                        email,
+                        password,
+                        avatar: null,
+                        gender,
+                        birthDate,
+                        phoneNumber
+                    });
+                    
+                    if (result.success) {
+                        this.currentUser = result.user;
+                        this.saveData(CONFIG.STORAGE_KEYS.CURRENT_USER, JSON.stringify(this.currentUser));
+                        this.showMessage('✅ Hesab uğurla yaradıldı!', 'success');
+                        this.showMainMenu();
+                    } else {
+                        this.showMessage(`❌ ${result.error}`, 'error');
+                    }
+                } catch (error) {
+                    this.showMessage('❌ Qeydiyyat zamanı xəta baş verdi!', 'error');
+                }
+            }
+            
+            handleLogin(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                try {
+                    const result = this.db.login(email, password);
+                    
+                    if (result.success) {
+                        this.currentUser = result.user;
+                        this.saveData(CONFIG.STORAGE_KEYS.CURRENT_USER, JSON.stringify(this.currentUser));
+                        this.showMainMenu();
+                        this.updateOnlineUsers();
+                    } else {
+                        const errorElem = document.getElementById('loginError');
+                        errorElem.className = 'status-message status-error';
+                        errorElem.textContent = '❌ ' + (result.error || 'Giriş uğursuz oldu');
+                        errorElem.style.display = 'block';
+                    }
+                } catch (error) {
+                    const errorElem = document.getElementById('loginError');
+                    errorElem.className = 'status-message status-error';
+                    errorElem.textContent = '❌ Giriş zamanı xəta baş verdi';
+                    errorElem.style.display = 'block';
+                }
+            }
+            
+            // ===================== ƏSAS MENYU =====================
+            showMainMenu() {
+                document.getElementById('logoutBtn').style.display = 'block';
+                document.getElementById('adminBtn').style.display = (this.currentUser && this.currentUser.isAdmin) ? 'block' : 'none';
+                
+                const userStats = this.db.getUserStats(this.currentUser.id);
+                const limitCheck = this.checkDailyLimit();
+                
+                const genderText = this.currentUser.gender === 'male' ? '👨 Kişi' : '👩 Qadın';
+                const age = this.calculateAge(this.currentUser.birthDate);
+                
+                const html = `
+                    <h1>🎮 Xoş Gəldiniz, ${this.currentUser.firstName}!</h1>
+                    
+                    <div class="profile-container" style="margin-bottom:20px;">
+                        <div class="avatar" id="avatarContainer" style="width:100px;height:100px;font-size:24px;cursor:pointer;">
+                            ${this.currentUser.avatar ? 
+                                `<img src="${this.currentUser.avatar}" alt="Avatar">` : 
+                                `<span style="font-size:24px;">${this.currentUser.firstName.charAt(0)}${this.currentUser.lastName.charAt(0)}</span>`
+                            }
+                        </div>
+                        <h3>${this.currentUser.firstName} ${this.currentUser.lastName}</h3>
+                        <p style="color:#666;margin-bottom:15px;">
+                            ${genderText} • ${age} yaş
+                        </p>
+                    </div>
+                    
+                    <div class="user-details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">📧 E-poçt</span>
+                            <span class="detail-value">${this.currentUser.email}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">📱 Mobil</span>
+                            <span class="detail-value">${this.currentUser.phoneNumber || 'Təyin edilməyib'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">🎂 Doğum tarixi</span>
+                            <span class="detail-value">${this.currentUser.birthDate ? new Date(this.currentUser.birthDate).toLocaleDateString('az-AZ') : 'Təyin edilməyib'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">📅 Qeydiyyat</span>
+                            <span class="detail-value">${new Date(this.currentUser.registrationDate).toLocaleDateString('az-AZ')}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-section">
+                        <h3>🏆 Oyun Statistika</h3>
+                        <div style="display:flex; justify-content:space-around; text-align:center;">
+                            <div>
+                                <div style="font-size:14px;color:#666;">BUGÜNKÜ XAL</div>
+                                <div style="font-size:28px; font-weight:bold;color:var(--secondary-color);">${this.currentUser.dailyPoints || 0}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:14px;color:#666;">ÜMUMİ XAL</div>
+                                <div style="font-size:28px; font-weight:bold;color:var(--primary-color);">${userStats ? userStats.totalPoints : 0}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:14px;color:#666;">REYTİNQ</div>
+                                <div style="font-size:28px; font-weight:bold;color:var(--accent-color);">#${this.getUserRank() || '-'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${!limitCheck.canPlay ? `
+                        <div class="daily-limit-info" style="background-color:#ffe6e6;border-left-color:#ff4444;">
+                            <h3>⏳ Günlük Limit</h3>
+                            <p>Bu gün artıq oynamısınız. Növbəti gün gözləyin!</p>
+                        </div>
+                    ` : `
+                        <div class="daily-limit-info">
+                            <h3>🎯 Gündəlik Oyun</h3>
+                            <p>Bu gün 5 puzzle-lıq mərhələni tamamlaya bilərsiniz.</p>
+                            <p style="font-size:12px;color:#666;">Günlük xallar gecə 00:00-da sıfırlanacaq</p>
+                        </div>
+                    `}
+                    
+                    <div style="margin-top: 30px; text-align:center;">
+                        <button id="startGameBtn" class="submit-btn ${!limitCheck.canPlay ? 'btn-disabled' : ''}" ${!limitCheck.canPlay ? 'disabled' : ''} style="width:80%;margin-bottom:15px;">
+                            ${limitCheck.canPlay ? '▶️ GÜNDƏLİK OYUNA BAŞLA' : '⏳ GÜNLÜK LİMİT'}
+                        </button>
+                        <button id="profileBtn" class="submit-btn" style="width:80%;margin-bottom:15px;">👤 Profilim</button>
+                        <button id="editProfileBtn" class="submit-btn" style="width:80%;margin-bottom:15px;">✏️ Profili Redaktə Et</button>
+                        ${this.currentUser.isAdmin ? `
+                        <button id="adminPanelBtn" class="submit-btn btn-admin" style="width:80%;">⚙️ Admin Panel</button>
+                        ` : ''}
+                    </div>
+                `;
+                
+                this.updateFormContent(html);
+                this.updateNextResetDisplay();
+                
+                setTimeout(() => {
+                    document.getElementById('startGameBtn').addEventListener('click', () => this.startPuzzleGame());
+                    document.getElementById('profileBtn').addEventListener('click', () => this.showUserProfile());
+                    document.getElementById('editProfileBtn').addEventListener('click', () => this.showEditProfileForm());
+                    document.getElementById('avatarContainer').addEventListener('click', () => this.showAvatarUpload());
+                    if (this.currentUser.isAdmin) {
+                        document.getElementById('adminPanelBtn').addEventListener('click', () => this.showAdminPanel());
+                    }
+                }, 100);
+            }
+            
+            // ===================== PROFILE FUNCTIONS =====================
+            calculateAge(birthDate) {
+                if (!birthDate) return '-';
+                const birth = new Date(birthDate);
+                const today = new Date();
+                let age = today.getFullYear() - birth.getFullYear();
+                const monthDiff = today.getMonth() - birth.getMonth();
+                
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                    age--;
+                }
+                
+                return age;
+            }
+            
+            getUserRank() {
+                const rating = this.db.getDailyRating();
+                const userIndex = rating.findIndex(user => user.id === this.currentUser.id);
+                return userIndex !== -1 ? userIndex + 1 : null;
+            }
+            
+            showUserProfile() {
+                const userStats = this.db.getUserStats(this.currentUser.id);
+                const genderText = this.currentUser.gender === 'male' ? 'Kişi' : 'Qadın';
+                const genderBadge = this.currentUser.gender === 'male' ? '👨' : '👩';
+                const age = this.calculateAge(this.currentUser.birthDate);
+                
+                const html = `
+                    <h1>👤 Profilim</h1>
+                    <div class="profile-container">
+                        <div class="avatar" id="profileAvatar" style="cursor:pointer;">
+                            ${this.currentUser.avatar ? 
+                                `<img src="${this.currentUser.avatar}" alt="Profil şəkli">` : 
+                                `<span style="font-size:40px;">${this.currentUser.firstName.charAt(0)}${this.currentUser.lastName.charAt(0)}</span>`
+                            }
+                            <div style="position:absolute; bottom:5px; right:5px; background:var(--primary-color); color:white; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; font-size:14px;">
+                                ✏️
+                            </div>
+                        </div>
+                        <h2 class="user-name">${this.currentUser.firstName} ${this.currentUser.lastName}</h2>
+                        <p>
+                            <span class="gender-badge ${this.currentUser.gender}">
+                                ${genderBadge} ${genderText}
+                            </span>
+                            ${age !== '-' ? `<span style="margin-left:10px;">${age} yaş</span>` : ''}
+                        </p>
+                        
+                        <div class="profile-section">
+                            <h3>📋 Şəxsi Məlumatlar</h3>
+                            <div class="user-details-grid">
+                                <div class="detail-item">
+                                    <span class="detail-label">📧 E-poçt</span>
+                                    <span class="detail-value">${this.currentUser.email}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">📱 Mobil nömrə</span>
+                                    <span class="detail-value">${this.currentUser.phoneNumber || 'Təyin edilməyib'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">🎂 Doğum tarixi</span>
+                                    <span class="detail-value">${this.currentUser.birthDate ? new Date(this.currentUser.birthDate).toLocaleDateString('az-AZ') : 'Təyin edilməyib'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">📅 Qeydiyyat tarixi</span>
+                                    <span class="detail-value">${new Date(this.currentUser.registrationDate).toLocaleDateString('az-AZ')}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">🆔 İstifadəçi ID</span>
+                                    <span class="detail-value"><small>${this.currentUser.id.substring(0, 12)}...</small></span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">🔑 Son giriş</span>
+                                    <span class="detail-value">${new Date(this.currentUser.lastLogin).toLocaleString('az-AZ')}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin:20px 0; padding:20px; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; border-radius:10px;">
+                            <h3 style="color:white; margin-top:0;">🏆 Oyun Statistika</h3>
+                            <div style="display:flex; justify-content:space-around; text-align:center;">
+                                <div>
+                                    <div style="font-size:12px;">BUGÜNKÜ XAL</div>
+                                    <div style="font-size:32px; font-weight:bold;">${this.currentUser.dailyPoints || 0}</div>
+                                    <div style="font-size:11px;">⭐ 00:00-da sıfırlanacaq</div>
+                                </div>
+                                <div style="border-left:1px solid rgba(255,255,255,0.3); padding-left:20px;">
+                                    <div style="font-size:12px;">ÜMUMİ XAL</div>
+                                    <div style="font-size:32px; font-weight:bold;">${userStats ? userStats.totalPoints : 0}</div>
+                                    <div style="font-size:11px;">🎮 Bütün zamanlar</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${this.currentUser.isAdmin ? `
+                            <div style="margin:20px 0;padding:15px;background:#f0f8ff;border-radius:8px;border-left:4px solid var(--admin-color);">
+                                <h3>👑 Admin Status</h3>
+                                <p>• Admin panelinə daxil ola bilərsiniz</p>
+                                <p>• İstifadəçiləri idarə edə bilərsiniz</p>
+                                <p>• Puzzle şəkillərini idarə edə bilərsiniz</p>
+                                <button onclick="window.showAdminPanel()" class="btn-admin" style="margin-top:10px;">⚙️ Admin Panel</button>
+                            </div>
+                        ` : ''}
+                        
+                        <div style="margin:20px 0; text-align:center;">
+                            <button id="backToMenuFromProfile" class="submit-btn" style="width:80%;margin-bottom:10px;">← Əsas Menyu</button>
+                            <button id="editProfileBtn2" class="submit-btn" style="width:80%;">✏️ Profili Redaktə Et</button>
+                        </div>
+                    </div>
+                `;
+                
+                this.updateFormContent(html);
+                
+                setTimeout(() => {
+                    document.getElementById('backToMenuFromProfile').addEventListener('click', () => this.showMainMenu());
+                    document.getElementById('editProfileBtn2').addEventListener('click', () => this.showEditProfileForm());
+                    document.getElementById('profileAvatar').addEventListener('click', () => this.showAvatarUpload());
+                }, 100);
+            }
+            
+            showEditProfileForm() {
+                const html = `
+                    <h1>✏️ Profil Redaktəsi</h1>
+                    
+                    <form id="editProfileForm">
+                        <div class="profile-section">
+                            <h3>👤 Əsas Məlumatlar</h3>
+                            <div class="form-group">
+                                <label for="editFirstName">Ad *</label>
+                                <input type="text" id="editFirstName" value="${this.currentUser.firstName}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editLastName">Soyad *</label>
+                                <input type="text" id="editLastName" value="${this.currentUser.lastName}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editEmail">E-poçt *</label>
+                                <input type="email" id="editEmail" value="${this.currentUser.email}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-section">
+                            <h3>📋 Şəxsi Məlumatlar</h3>
+                            <div class="form-group">
+                                <label for="editGender">Cinsiyyət *</label>
+                                <div class="gender-options">
+                                    <label class="gender-option gender-male">
+                                        <input type="radio" name="editGender" value="male" class="gender-radio" ${this.currentUser.gender === 'male' ? 'checked' : ''}>
+                                        Kişi 👨
+                                    </label>
+                                    <label class="gender-option gender-female">
+                                        <input type="radio" name="editGender" value="female" class="gender-radio" ${this.currentUser.gender === 'female' ? 'checked' : ''}>
+                                        Qadın 👩
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="editBirthDate">Doğum tarixi *</label>
+                                <input type="date" id="editBirthDate" value="${this.currentUser.birthDate || ''}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="editPhoneNumber">Mobil nömrə *</label>
+                                <input type="tel" id="editPhoneNumber" value="${this.currentUser.phoneNumber || ''}" 
+                                       required pattern="[+]{1}[0-9]{12}" placeholder="+994501234567">
+                                <small style="color:#666;">Format: +994501234567</small>
+                            </div>
+                        </div>
+                        
+                        <div id="editProfileError" class="status-message" style="display:none;"></div>
+                        
+                        <button type="submit" class="submit-btn">💾 Dəyişiklikləri Saxla</button>
+                        <button type="button" id="cancelEditBtn" style="width:100%;margin-top:10px;background:#6c757d;">
+                            ❌ Ləğv et
+                        </button>
+                    </form>
+                `;
+                
+                this.updateFormContent(html);
+                
+                setTimeout(() => {
+                    const today = new Date();
+                    const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
+                    const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+                    
+                    const birthDateInput = document.getElementById('editBirthDate');
+                    birthDateInput.min = minDate.toISOString().split('T')[0];
+                    birthDateInput.max = maxDate.toISOString().split('T')[0];
+                    
+                    if (!this.currentUser.birthDate) {
+                        birthDateInput.value = maxDate.toISOString().split('T')[0];
+                    }
+                    
+                    document.getElementById('editProfileForm').addEventListener('submit', (e) => this.handleEditProfile(e));
+                    document.getElementById('cancelEditBtn').addEventListener('click', () => this.showMainMenu());
+                }, 100);
+            }
+            
+            handleEditProfile(e) {
+                e.preventDefault();
+                
+                const firstName = document.getElementById('editFirstName').value;
+                const lastName = document.getElementById('editLastName').value;
+                const email = document.getElementById('editEmail').value;
+                const gender = document.querySelector('input[name="editGender"]:checked').value;
+                const birthDate = document.getElementById('editBirthDate').value;
+                const phoneNumber = document.getElementById('editPhoneNumber').value;
+                
+                const existingUser = this.db.users.find(u => 
+                    u.email === email && 
+                    u.id !== this.currentUser.id
+                );
+                
+                if (existingUser) {
+                    const errorElem = document.getElementById('editProfileError');
+                    errorElem.className = 'status-message status-error';
+                    errorElem.textContent = '❌ Bu email artıq başqa istifadəçi tərəfindən istifadə olunur';
+                    errorElem.style.display = 'block';
+                    return;
+                }
+                
+                if (!phoneNumber.match(/^\+994[0-9]{9}$/)) {
+                    const errorElem = document.getElementById('editProfileError');
+                    errorElem.className = 'status-message status-error';
+                    errorElem.textContent = '❌ Mobil nömrə formatı düzgün deyil! (+994501234567)';
+                    errorElem.style.display = 'block';
+                    return;
+                }
+                
+                try {
+                    const result = this.db.updateUserProfile(this.currentUser.id, {
+                        firstName,
+                        lastName,
+                        email,
+                        gender,
+                        birthDate,
+                        phoneNumber
+                    });
+                    
+                    if (result.success) {
+                        this.currentUser = result.user;
+                        this.saveData(CONFIG.STORAGE_KEYS.CURRENT_USER, JSON.stringify(this.currentUser));
+                        this.showMessage('✅ Profil məlumatları uğurla yeniləndi!', 'success');
+                        this.showMainMenu();
+                    } else {
+                        const errorElem = document.getElementById('editProfileError');
+                        errorElem.className = 'status-message status-error';
+                        errorElem.textContent = `❌ ${result.error}`;
+                        errorElem.style.display = 'block';
+                    }
+                } catch (error) {
+                    const errorElem = document.getElementById('editProfileError');
+                    errorElem.className = 'status-message status-error';
+                    errorElem.textContent = '❌ Profil yeniləmə zamanı xəta baş verdi';
+                    errorElem.style.display = 'block';
+                }
+            }
+            
+            // ===================== AVATAR FUNCTIONS =====================
+            showAvatarUpload() {
+                document.getElementById('avatarModal').classList.add('active');
+                document.getElementById('previewImage').src = this.currentUser.avatar || '';
+                this.selectedAvatar = null;
+                document.getElementById('saveAvatarBtn').disabled = true;
+            }
+            
+            closeAvatarModal() {
+                document.getElementById('avatarModal').classList.remove('active');
+                document.getElementById('avatarInput').value = '';
+                this.selectedAvatar = null;
+            }
+            
+            handleAvatarSelect(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                if (!file.type.match('image.*')) {
+                    this.showMessage('❌ Yalnız şəkil faylları qəbul olunur!', 'error');
+                    return;
+                }
+                
+                if (file.size > 5 * 1024 * 1024) {
+                    this.showMessage('❌ Şəkil ölçüsü 5MB-dan çox ola bilməz!', 'error');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    this.selectedAvatar = event.target.result;
+                    document.getElementById('previewImage').src = this.selectedAvatar;
+                    document.getElementById('saveAvatarBtn').disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            saveAvatar() {
+                if (!this.selectedAvatar) {
+                    this.showMessage('❌ Zəhmət olmasa şəkil seçin!', 'error');
+                    return;
+                }
+                
+                try {
+                    const result = this.db.updateAvatar(this.currentUser.id, this.selectedAvatar);
+                    
+                    if (result.success) {
+                        this.currentUser = result.user;
+                        this.saveData(CONFIG.STORAGE_KEYS.CURRENT_USER, JSON.stringify(this.currentUser));
+                        this.closeAvatarModal();
+                        this.showMessage('✅ Profil şəkliniz uğurla yeniləndi!', 'success');
+                        this.showMainMenu();
+                    } else {
+                        this.showMessage(`❌ ${result.error}`, 'error');
+                    }
+                } catch (error) {
+                    this.showMessage('❌ Avatar yeniləmə zamanı xəta baş verdi', 'error');
+                }
+            }
+            
+            // ===================== PUZZLE OYUNU =====================
+            startPuzzleGame() {
+                const limitCheck = this.checkDailyLimit();
+                if (!limitCheck.canPlay) {
+                    this.showMessage(limitCheck.reason, 'warning');
+                    return;
+                }
+                
+                const puzzleImages = this.db.getPuzzleImages();
+                const gameImages = puzzleImages.slice(0, CONFIG.PUZZLE.TOTAL_PUZZLES);
+                
+                const html = `
+                    <div class="game-screen" id="gameScreen">
+                        <div class="daily-limit-info">
+                            <h3>🎯 Gündəlik Mərhələ: ${CONFIG.PUZZLE.TOTAL_PUZZLES} Puzzle</h3>
+                            <p>⭐ Günlük xallar: <strong>${this.currentUser.dailyPoints || 0}</strong></p>
+                        </div>
+                        
+                        <div class="progress-container">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+                        
+                        <div class="game-info">
+                            <div class="info-item">
+                                <span class="puzzle-count">Puzzle: <span id="currentPuzzle">1</span>/${CONFIG.PUZZLE.TOTAL_PUZZLES}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="timer">Vaxt: <span id="timeDisplay">0</span>s</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="moves">Hərəkət: <span id="movesDisplay">0</span></span>
+                            </div>
+                            <div class="info-item">
+                                <span class="points">Xal: <span id="pointsDisplay">${this.currentUser.dailyPoints || 0}</span></span>
+                            </div>
+                        </div>
+                        
+                        <div class="controls">
+                            <button id="pauseBtn" class="btn-warning">⏸️ Pauza</button>
+                            <button id="nextPuzzleBtn" class="btn-secondary" style="display:none;">⏭️ Növbəti</button>
+                            <button id="resetBtn" class="btn-primary">🔄 Sıfırla</button>
+                            <button id="backToMenuBtn" class="btn-primary">← Menyu</button>
+                        </div>
+                        
+                        <div class="original-image-container">
+                            <img src="${gameImages[0]?.url || CONFIG.PUZZLE.DEFAULT_IMAGES[0]}" class="original-image" id="originalImage">
+                        </div>
+                        
+                        <div class="success-message" id="successMessage" style="display:none;"></div>
+                        
+                        <div class="puzzle-simple-container">
+                            <div class="puzzle-board-simple" id="puzzleBoard"></div>
+                        </div>
+                    </div>
+                `;
+                
+                this.updateFormContent(html);
+                this.initPuzzleGame(gameImages);
+            }
+            
+            initPuzzleGame(gameImages) {
+                class PuzzleGame {
+                    constructor(app, images) {
+                        this.app = app;
+                        this.selectedPiece = null;
+                        this.time = 0;
+                        this.moves = 0;
+                        this.totalTime = 0;
+                        this.timer = null;
+                        this.isGameActive = false;
+                        this.currentPuzzle = 1;
+                        this.totalPuzzles = CONFIG.PUZZLE.TOTAL_PUZZLES;
+                        this.gameImages = images;
+                        this.currentImage = "";
+                        this.isPaused = false;
+                        
+                        this.init();
+                    }
+                    
+                    init() {
+                        this.currentImage = this.gameImages[this.currentPuzzle - 1]?.url || CONFIG.PUZZLE.DEFAULT_IMAGES[this.currentPuzzle - 1];
+                        this.createPuzzlePieces();
+                        this.isGameActive = true;
+                        this.updateDisplays();
+                        this.startTimer();
+                        this.updateProgressBar();
+                        
+                        document.getElementById('nextPuzzleBtn').addEventListener('click', () => this.nextPuzzle());
+                        document.getElementById('resetBtn').addEventListener('click', () => this.resetPuzzle());
+                        document.getElementById('pauseBtn').addEventListener('click', () => this.togglePause());
+                        document.getElementById('backToMenuBtn').addEventListener('click', () => this.app.showMainMenu());
+                    }
+                    
+                    createPuzzlePieces() {
+                        const puzzleBoard = document.getElementById('puzzleBoard');
+                        puzzleBoard.innerHTML = '';
+                        
+                        const correctPositions = [];
+                        for (let row = 0; row < 2; row++) {
+                            for (let col = 0; col < 3; col++) {
+                                correctPositions.push({ row, col, index: row * 3 + col });
+                            }
+                        }
+                        
+                        const shuffledPositions = [...correctPositions];
+                        for (let i = shuffledPositions.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [shuffledPositions[i], shuffledPositions[j]] = [shuffledPositions[j], shuffledPositions[i]];
+                        }
+                        
+                        shuffledPositions.forEach((pos, index) => {
+                            const piece = document.createElement('div');
+                            piece.className = 'puzzle-piece-simple';
+                            piece.dataset.correctRow = pos.row;
+                            piece.dataset.correctCol = pos.col;
+                            piece.dataset.currentIndex = index;
+                            
+                            piece.style.backgroundImage = `url('${this.currentImage}')`;
+                            piece.style.backgroundPosition = `-${pos.col * 100}px -${pos.row * 100}px`;
+                            piece.style.backgroundSize = '300px 200px';
+                            
+                            piece.addEventListener('click', (e) => this.handlePieceClick(e));
+                            puzzleBoard.appendChild(piece);
+                        });
+                    }
+                    
+                    handlePieceClick(e) {
+                        if (!this.isGameActive || this.isPaused) return;
+                        
+                        const piece = e.currentTarget;
+                        
+                        if (!this.selectedPiece) {
+                            this.selectedPiece = piece;
+                            piece.style.border = '3px solid var(--secondary-color)';
+                            piece.style.zIndex = '2';
+                        } else if (this.selectedPiece === piece) {
+                            this.selectedPiece.style.border = '1px solid #ddd';
+                            this.selectedPiece.style.zIndex = '1';
+                            this.selectedPiece = null;
+                        } else {
+                            this.swapPieces(this.selectedPiece, piece);
+                            this.selectedPiece.style.border = '1px solid #ddd';
+                            this.selectedPiece.style.zIndex = '1';
+                            this.selectedPiece = null;
+                            
+                            this.moves++;
+                            this.updateDisplays();
+                            this.checkPuzzleSolved();
+                        }
+                    }
+                    
+                    swapPieces(piece1, piece2) {
+                        const tempIndex = piece1.dataset.currentIndex;
+                        piece1.dataset.currentIndex = piece2.dataset.currentIndex;
+                        piece2.dataset.currentIndex = tempIndex;
+                        
+                        const temp = document.createElement('div');
+                        piece1.parentNode.insertBefore(temp, piece1);
+                        piece2.parentNode.insertBefore(piece1, piece2);
+                        temp.parentNode.insertBefore(piece2, temp);
+                        temp.parentNode.removeChild(temp);
+                    }
+                    
+                    checkPuzzleSolved() {
+                        const puzzleBoard = document.getElementById('puzzleBoard');
+                        const pieces = puzzleBoard.children;
+                        let solved = true;
+                        
+                        for (let i = 0; i < pieces.length; i++) {
+                            const piece = pieces[i];
+                            const correctRow = Math.floor(i / 3);
+                            const correctCol = i % 3;
+                            
+                            if (parseInt(piece.dataset.correctRow) !== correctRow || 
+                                parseInt(piece.dataset.correctCol) !== correctCol) {
+                                solved = false;
+                                break;
+                            }
+                        }
+                        
+                        if (solved) {
+                            this.isGameActive = false;
+                            clearInterval(this.timer);
+                            this.totalTime += this.time;
+                            
+                            const basePoints = CONFIG.GAME.BASE_POINTS;
+                            const timeBonus = Math.max(0, CONFIG.GAME.MAX_TIME_BONUS - (this.time * CONFIG.GAME.TIME_BONUS_MULTIPLIER));
+                            const movesBonus = Math.max(0, CONFIG.GAME.MAX_MOVES_BONUS - (this.moves * CONFIG.GAME.MOVES_BONUS_MULTIPLIER));
+                            const earnedPoints = basePoints + timeBonus + movesBonus;
+                            
+                            this.app.db.updatePoints(this.app.currentUser.id, earnedPoints);
+                            this.app.currentUser.dailyPoints = (this.app.currentUser.dailyPoints || 0) + earnedPoints;
+                            this.app.currentUser.totalPoints = (this.app.currentUser.totalPoints || 0) + earnedPoints;
+                            this.app.saveData(CONFIG.STORAGE_KEYS.CURRENT_USER, JSON.stringify(this.app.currentUser));
+                            
+                            this.updateDisplays();
+                            
+                            const successMessage = document.getElementById('successMessage');
+                            successMessage.textContent = `🎉 Puzzle ${this.currentPuzzle} tamamlandı! ${this.time}s, ${this.moves} hərəkət, +${earnedPoints} xal!`;
+                            successMessage.style.display = 'block';
+                            
+                            if (this.currentPuzzle < this.totalPuzzles) {
+                                document.getElementById('nextPuzzleBtn').style.display = 'inline-block';
+                            } else {
+                                successMessage.innerHTML = `
+                                    🏆 <strong>TƏBRİKLƏR!</strong> <br>
+                                    Gündəlik ${this.totalPuzzles} puzzle tamamlandı! <br>
+                                    Ümumi nəticə: ${this.totalTime}s, <strong>${this.app.currentUser.dailyPoints || 0}</strong> günlük xal
+                                `;
+                                this.app.markDailyCompleted();
+                            }
+                            
+                            this.app.updateDailyRatingTable();
+                        }
+                    }
+                    
+                    nextPuzzle() {
+                        if (this.currentPuzzle < this.totalPuzzles) {
+                            this.currentPuzzle++;
+                            document.getElementById('currentPuzzle').textContent = this.currentPuzzle;
+                            document.getElementById('nextPuzzleBtn').style.display = 'none';
+                            
+                            this.currentImage = this.gameImages[this.currentPuzzle - 1]?.url || CONFIG.PUZZLE.DEFAULT_IMAGES[this.currentPuzzle - 1];
+                            document.getElementById('originalImage').src = this.currentImage;
+                            
+                            this.createPuzzlePieces();
+                            this.isGameActive = true;
+                            this.time = 0;
+                            this.moves = 0;
+                            this.updateDisplays();
+                            this.startTimer();
+                            document.getElementById('successMessage').style.display = 'none';
+                            this.updateProgressBar();
+                        }
+                    }
+                    
+                    resetPuzzle() {
+                        if (this.isPaused) this.togglePause();
+                        
+                        this.createPuzzlePieces();
+                        this.time = 0;
+                        this.moves = 0;
+                        this.selectedPiece = null;
+                        this.updateDisplays();
+                        this.startTimer();
+                        document.getElementById('successMessage').style.display = 'none';
+                    }
+                    
+                    togglePause() {
+                        if (!this.isGameActive) return;
+                        
+                        this.isPaused = !this.isPaused;
+                        const pauseBtn = document.getElementById('pauseBtn');
+                        
+                        if (this.isPaused) {
+                            clearInterval(this.timer);
+                            pauseBtn.innerHTML = '▶️ Davam Et';
+                            pauseBtn.className = 'btn-secondary';
+                        } else {
+                            pauseBtn.innerHTML = '⏸️ Pauza';
+                            pauseBtn.className = 'btn-warning';
+                            this.startTimer();
+                        }
+                    }
+                    
+                    startTimer() {
+                        clearInterval(this.timer);
+                        this.timer = setInterval(() => {
+                            if (!this.isPaused) {
+                                this.time++;
+                                this.updateDisplays();
+                            }
+                        }, 1000);
+                    }
+                    
+                    updateDisplays() {
+                        document.getElementById('timeDisplay').textContent = this.time;
+                        document.getElementById('movesDisplay').textContent = this.moves;
+                        document.getElementById('pointsDisplay').textContent = this.app.currentUser.dailyPoints || 0;
+                    }
+                    
+                    updateProgressBar() {
+                        const progress = ((this.currentPuzzle - 1) / this.totalPuzzles) * 100;
+                        document.getElementById('progressBar').style.width = `${progress}%`;
+                    }
+                }
+                
+                this.puzzleGame = new PuzzleGame(this, gameImages);
+            }
+            
+            // ===================== REYTİNQ CƏDVƏLİ =====================
+            updateDailyRatingTable() {
+                try {
+                    const users = this.db.getDailyRating();
+                    
+                    let html = '';
+                    users.forEach((user, index) => {
+                        const isCurrentUser = user.id === this.currentUser?.id;
+                        const rankColor = index === 0 ? '#ffd700' : 
+                                         index === 1 ? '#c0c0c0' : 
+                                         index === 2 ? '#cd7f32' : 'transparent';
+                        const genderIcon = user.gender === 'female' ? '👩' : '👨';
+                        
+                        html += `
+                            <tr>
+                                <td>
+                                    ${index < 3 ? 
+                                        `<span class="rank-badge" style="background-color:${rankColor};">${index + 1}</span>` : 
+                                        `${index + 1}`
+                                    }
+                                </td>
+                                <td>
+                                    <div style="display:flex;align-items:center;gap:8px;">
+                                        <div class="user-avatar" style="width:24px;height:24px;font-size:10px;${isCurrentUser ? 'background-color:#1877f2;color:white;' : ''}">
+                                            ${user.avatar ? 
+                                                `<img src="${user.avatar}" alt="Avatar">` : 
+                                                `<span>${genderIcon}</span>`
+                                            }
+                                        </div>
+                                        ${user.firstName || 'İstifadəçi'}
+                                        ${isCurrentUser ? '<span style="color:#1877f2;font-size:10px;">(Siz)</span>' : ''}
+                                    </div>
+                                </td>
+                                <td>
+                                    ${user.dailyPoints || 0}
+                                    ${isCurrentUser ? '<span style="color:#42b72a;font-size:12px;">⭐</span>' : ''}
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    
+                    if (users.length === 0) {
+                        html = `
+                            <tr>
+                                <td colspan="3" style="text-align:center; padding:20px; color:#666;">
+                                    📊 Hələ heç bir xal yoxdur
+                                </td>
+                            </tr>
+                        `;
+                    }
+                    
+                    document.getElementById('ratingBody').innerHTML = html;
+                    
+                } catch (error) {
+                    console.error('Reyting cədvəli yeniləmə xətası:', error);
+                }
+            }
+            
+            // ===================== ONLINE İSTİFADƏÇİLƏR =====================
+            updateOnlineUsers() {
+                try {
+                    const onlineUsers = this.db.getOnlineUsers();
+                    
+                    let html = '';
+                    
+                    if (this.currentUser) {
+                        html += `
+                            <li class="user-item">
+                                <div class="user-avatar" style="background-color:#1877f2;color:white;">
+                                    ${this.currentUser.avatar ? 
+                                        `<img src="${this.currentUser.avatar}" alt="Avatar">` : 
+                                        `<span>${this.currentUser.gender === 'female' ? '👩' : '👨'}</span>`
+                                    }
+                                </div>
+                                <span><strong>Siz</strong></span>
+                            </li>
+                        `;
+                    }
+                    
+                    onlineUsers.forEach(user => {
+                        if (user.id === this.currentUser?.id) return;
+                        
+                        html += `
+                            <li class="user-item">
+                                <div class="user-avatar">
+                                    <span>${user.gender === 'female' ? '👩' : '👨'}</span>
+                                </div>
+                                <span>${user.firstName || 'İstifadəçi'}</span>
+                            </li>
+                        `;
+                    });
+                    
+                    if (html === '' || (this.currentUser && onlineUsers.length === 0)) {
+                        html = '<li class="user-item"><span style="color:#666;font-style:italic;">Online istifadəçi yoxdur</span></li>';
+                    }
+                    
+                    document.getElementById('userList').innerHTML = html;
+                    document.getElementById('onlineCount').textContent = this.currentUser ? onlineUsers.length : onlineUsers.length;
+                    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('az-AZ', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                    
+                } catch (error) {
+                    console.error('Online istifadəçiləri yeniləmə xətası:', error);
+                }
+            }
+            
+            refreshRating() {
+                this.updateDailyRatingTable();
+                this.showMessage('Günlük reytinq yeniləndi!', 'success');
+            }
+            
+            refreshOnlineUsers() {
+                this.updateOnlineUsers();
+                this.showMessage('Online istifadəçilər yeniləndi!', 'success');
+            }
+            
+            // ===================== ADMIN PANEL =====================
+            showAdminPanel() {
+                if (!this.currentUser || !this.currentUser.isAdmin) {
+                    this.showMessage('❌ Admin panele giriş üçün admin hüquqlarınız yoxdur!', 'error');
+                    return;
+                }
+                document.getElementById('adminModal').classList.add('active');
+                this.loadAdminDashboard();
+            }
+            
+            closeAdminModal() {
+                document.getElementById('adminModal').classList.remove('active');
+                this.currentAdminTab = 'dashboard';
+            }
+            
+            closeEditImageModal() {
+                document.getElementById('editImageModal').classList.remove('active');
+            }
+            
+            switchAdminTab(tabName) {
+                this.currentAdminTab = tabName;
+                this.loadAdminDashboard();
+            }
+            
+            loadAdminDashboard() {
+                try {
+                    const users = this.db.getAllUsers();
+                    const onlineUsers = this.db.getOnlineUsers();
+                    const puzzleImages = this.db.getPuzzleImages();
+                    
+                    const totalUsers = users.length;
+                    const activeUsers = users.filter(u => u.isActive !== false).length;
+                    const onlineCount = onlineUsers.length;
+                    const totalPoints = users.reduce((sum, user) => sum + (user.totalPoints || 0), 0);
+                    const adminCount = users.filter(u => u.isAdmin).length;
+                    const totalImages = puzzleImages.length;
+                    
+                    const html = `
+                        <div class="admin-panel">
+                            <h2>👑 Admin İdarəetmə Panel</h2>
+                            
+                            <div class="admin-tabs">
+                                <button class="admin-tab ${this.currentAdminTab === 'dashboard' ? 'active' : ''}" 
+                                        onclick="app.switchAdminTab('dashboard')">
+                                    📊 Dashboard
+                                </button>
+                                <button class="admin-tab ${this.currentAdminTab === 'users' ? 'active' : ''}" 
+                                        onclick="app.switchAdminTab('users')">
+                                    👥 İstifadəçilər
+                                </button>
+                                <button class="admin-tab ${this.currentAdminTab === 'puzzleImages' ? 'active' : ''}" 
+                                        onclick="app.switchAdminTab('puzzleImages')">
+                                    🖼️ Puzzle Şəkilləri
+                                </button>
+                            </div>
+                            
+                            <div class="admin-tab-content ${this.currentAdminTab === 'dashboard' ? 'active' : ''}" id="dashboardTab">
+                                <div class="stats-grid">
+                                    <div class="stat-item">
+                                        <div class="stat-value">${totalUsers}</div>
+                                        <div class="stat-label">Ümumi İstifadəçi</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value">${activeUsers}</div>
+                                        <div class="stat-label">Aktiv İstifadəçi</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value">${onlineCount}</div>
+                                        <div class="stat-label">Online İstifadəçi</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value">${adminCount}</div>
+                                        <div class="stat-label">Admin Sayı</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value">${totalPoints}</div>
+                                        <div class="stat-label">Ümumi Xal</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value">${totalImages}</div>
+                                        <div class="stat-label">Puzzle Şəkli</div>
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-top:20px; text-align:center;">
+                                    <button id="resetPointsBtn" class="btn-warning">🔄 Günlük Xalları Sıfırla</button>
+                                </div>
+                            </div>
+                            
+                            <div class="admin-tab-content ${this.currentAdminTab === 'users' ? 'active' : ''}" id="usersTab">
+                                <h3>👥 Bütün İstifadəçilər</h3>
+                                <div class="admin-table-container">
+                                    <table class="admin-table">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Ad Soyad</th>
+                                                <th>Email</th>
+                                                <th>Cinsiyyət</th>
+                                                <th>Status</th>
+                                                <th>Ümumi Xal</th>
+                                                <th>Günlük Xal</th>
+                                                <th>Admin</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="adminUsersTable">
+                                            ${users.map(user => {
+                                                const isOnline = onlineUsers.some(u => u.id === user.id);
+                                                const isCurrentUser = user.id === this.currentUser.id;
+                                                const statusText = user.isActive === false ? '❌ Deaktiv' : 
+                                                                  isOnline ? '🟢 Online' : '⚫ Offline';
+                                                const genderText = user.gender === 'female' ? '👩' : '👨';
+                                                
+                                                return `
+                                                    <tr>
+                                                        <td><small>${user.id.substring(0, 8)}...</small></td>
+                                                        <td>
+                                                            ${user.firstName} ${user.lastName}
+                                                            ${isCurrentUser ? ' (Siz)' : ''}
+                                                        </td>
+                                                        <td>${user.email}</td>
+                                                        <td>${genderText}</td>
+                                                        <td>${statusText}</td>
+                                                        <td>${user.totalPoints || 0}</td>
+                                                        <td>${user.dailyPoints || 0}</td>
+                                                        <td>${user.isAdmin ? '✅' : '❌'}</td>
+                                                    </tr>
+                                                `;
+                                            }).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <div class="admin-tab-content ${this.currentAdminTab === 'puzzleImages' ? 'active' : ''}" id="puzzleImagesTab">
+                                <h3>🖼️ Puzzle Şəkillərinin İdarə Edilməsi</h3>
+                                
+                                <div class="add-image-form">
+                                    <h4>➕ Yeni Şəkil Əlavə Et</h4>
+                                    <div class="form-group">
+                                        <label for="newImageUrl">Şəkil URL-i *</label>
+                                        <input type="url" id="newImageUrl" placeholder="https://example.com/image.jpg" required>
+                                        <small style="color:#666;">Dəstəklənən formatlar: .jpg, .jpeg, .png, .gif, .webp, .bmp</small>
+                                    </div>
+                                    <button id="addImageBtn" class="submit-btn">➕ Şəkil Əlavə Et</button>
+                                    <div id="addImageError" class="status-message" style="display:none; margin-top:10px;"></div>
+                                </div>
+                                
+                                <div style="margin:20px 0;">
+                                    <button id="resetToDefaultBtn" class="btn-warning">🔄 Default Şəkillərə Qayıt</button>
+                                    <small style="display:block; margin-top:5px; color:#666;">* Default şəkillərə qayıdanda əlavə edilmiş bütün şəkillər silinəcək</small>
+                                </div>
+                                
+                                <h4>📋 Mövcud Şəkillər (${puzzleImages.length})</h4>
+                                <small style="color:#666; display:block; margin-bottom:10px;">İlk ${CONFIG.PUZZLE.TOTAL_PUZZLES} şəkil oyunda istifadə olunur. Şəkilləri sürükləyib buraxaraq sıralaya bilərsiniz.</small>
+                                
+                                <div class="images-grid" id="puzzleImagesGrid">
+                                    ${puzzleImages.map((image, index) => `
+                                        <div class="image-item" draggable="true" data-image-id="${image.id}">
+                                            <div class="drag-handle">
+                                                ↕️ #${index + 1}
+                                                ${image.isDefault ? '<span style="color:var(--primary-color); font-size:10px;"> (Default)</span>' : ''}
+                                            </div>
+                                            <div class="image-preview">
+                                                <img src="${image.url}" alt="Puzzle image ${index + 1}" 
+                                                     onerror="this.src='https://via.placeholder.com/300x200?text=Şəkil+Yüklənmədi'">
+                                            </div>
+                                            <div class="image-info">
+                                                <div style="font-weight:600;">Şəkil #${index + 1}</div>
+                                                <div class="image-url">${image.url.substring(0, 50)}${image.url.length > 50 ? '...' : ''}</div>
+                                                <div class="image-actions">
+                                                    <button class="image-btn image-btn-edit" onclick="app.editPuzzleImage('${image.id}')">
+                                                        ✏️ Dəyiş
+                                                    </button>
+                                                    ${!image.isDefault ? `
+                                                        <button class="image-btn image-btn-delete" onclick="app.deletePuzzleImage('${image.id}')">
+                                                            🗑️ Sil
+                                                        </button>
+                                                    ` : `
+                                                        <button class="image-btn image-btn-delete" disabled title="Default şəkili silmək olmaz">
+                                                            🗑️ Sil
+                                                        </button>
+                                                    `}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                
+                                ${puzzleImages.length === 0 ? `
+                                    <div class="status-message status-info">
+                                        📭 Heç bir puzzle şəkli tapılmadı
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('adminModalContent').innerHTML = html;
+                    
+                    setTimeout(() => {
+                        if (this.currentAdminTab === 'dashboard') {
+                            document.getElementById('resetPointsBtn').addEventListener('click', () => this.resetAllDailyPoints());
+                        }
+                        
+                        if (this.currentAdminTab === 'puzzleImages') {
+                            document.getElementById('addImageBtn').addEventListener('click', () => this.addPuzzleImage());
+                            document.getElementById('resetToDefaultBtn').addEventListener('click', () => this.resetToDefaultImages());
+                            
+                            this.setupImageDragAndDrop();
+                        }
+                    }, 100);
+                    
+                } catch (error) {
+                    console.error('Admin panel yükləmə xətası:', error);
+                    document.getElementById('adminModalContent').innerHTML = `
+                        <div class="status-message status-error">
+                            ❌ Admin panel yüklənə bilmədi: ${error.message}
+                        </div>
+                    `;
+                }
+            }
+            
+            // ===================== PUZZLE ŞƏKİLLƏRİ ADMIN FUNCTIONS =====================
+            setupImageDragAndDrop() {
+                const grid = document.getElementById('puzzleImagesGrid');
+                if (!grid) return;
+                
+                const imageItems = grid.querySelectorAll('.image-item');
+                
+                imageItems.forEach(item => {
+                    item.addEventListener('dragstart', (e) => {
+                        this.draggedImage = item;
+                        item.classList.add('drag-over');
+                        e.dataTransfer.effectAllowed = 'move';
+                        e.dataTransfer.setData('text/plain', item.dataset.imageId);
+                    });
+                    
+                    item.addEventListener('dragend', () => {
+                        item.classList.remove('drag-over');
+                        imageItems.forEach(img => img.classList.remove('drag-over'));
+                        this.draggedImage = null;
+                    });
+                    
+                    item.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        item.classList.add('drag-over');
+                    });
+                    
+                    item.addEventListener('dragleave', () => {
+                        item.classList.remove('drag-over');
+                    });
+                    
+                    item.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        item.classList.remove('drag-over');
+                        
+                        if (this.draggedImage && this.draggedImage !== item) {
+                            const gridItems = Array.from(grid.querySelectorAll('.image-item'));
+                            const draggedIndex = gridItems.indexOf(this.draggedImage);
+                            const targetIndex = gridItems.indexOf(item);
+                            
+                            if (draggedIndex < targetIndex) {
+                                item.parentNode.insertBefore(this.draggedImage, item.nextSibling);
+                            } else {
+                                item.parentNode.insertBefore(this.draggedImage, item);
+                            }
+                            
+                            this.saveImageOrder();
+                        }
+                    });
+                });
+            }
+            
+            saveImageOrder() {
+                const grid = document.getElementById('puzzleImagesGrid');
+                if (!grid) return;
+                
+                const imageItems = grid.querySelectorAll('.image-item');
+                const imageIds = Array.from(imageItems).map(item => item.dataset.imageId);
+                
+                this.db.reorderPuzzleImages(imageIds);
+                this.showMessage('✅ Şəkillərin sırası yeniləndi!', 'success');
+            }
+            
+            addPuzzleImage() {
+                const urlInput = document.getElementById('newImageUrl');
+                const imageUrl = urlInput.value.trim();
+                
+                if (!imageUrl) {
+                    const errorElem = document.getElementById('addImageError');
+                    errorElem.className = 'status-message status-error';
+                    errorElem.textContent = '❌ Zəhmət olmasa şəkil URL-i daxil edin';
+                    errorElem.style.display = 'block';
+                    return;
+                }
+                
+                try {
+                    const result = this.db.addPuzzleImage(imageUrl);
+                    
+                    if (result.success) {
+                        urlInput.value = '';
+                        const errorElem = document.getElementById('addImageError');
+                        errorElem.className = 'status-message status-success';
+                        errorElem.textContent = '✅ Şəkil uğurla əlavə edildi!';
+                        errorElem.style.display = 'block';
+                        
+                        setTimeout(() => {
+                            this.loadAdminDashboard();
+                        }, 1000);
+                    } else {
+                        const errorElem = document.getElementById('addImageError');
+                        errorElem.className = 'status-message status-error';
+                        errorElem.textContent = `❌ ${result.error}`;
+                        errorElem.style.display = 'block';
+                    }
+                } catch (error) {
+                    const errorElem = document.getElementById('addImageError');
+                    errorElem.className = 'status-message status-error';
+                    errorElem.textContent = '❌ Şəkil əlavə edilərkən xəta baş verdi';
+                    errorElem.style.display = 'block';
+                }
+            }
+            
+            editPuzzleImage(imageId) {
+                const image = this.db.puzzleImages.find(img => img.id === imageId);
+                if (!image) {
+                    this.showMessage('❌ Şəkil tapılmadı', 'error');
+                    return;
+                }
+                
+                const html = `
+                    <div class="edit-image-form">
+                        <div class="form-group">
+                            <label for="editImageUrl">Şəkil URL-i *</label>
+                            <input type="url" id="editImageUrl" value="${image.url}" required>
+                            <small style="color:#666;">Dəstəklənən formatlar: .jpg, .jpeg, .png, .gif, .webp, .bmp</small>
+                        </div>
+                        
+                        <div class="url-preview">
+                            <strong>Önizləmə:</strong><br>
+                            <img src="${image.url}" alt="Preview" id="imagePreview" 
+                                 onerror="this.src='https://via.placeholder.com/300x200?text=Şəkil+Yüklənmədi'">
+                        </div>
+                        
+                        <div id="editImageError" class="status-message" style="display:none;"></div>
+                        
+                        <button id="saveImageBtn" class="submit-btn">💾 Dəyişiklikləri Saxla</button>
+                    </div>
+                `;
+                
+                document.getElementById('editImageModalContent').innerHTML = html;
+                document.getElementById('editImageModal').classList.add('active');
+                
+                setTimeout(() => {
+                    document.getElementById('editImageUrl').addEventListener('input', (e) => {
+                        const preview = document.getElementById('imagePreview');
+                        preview.src = e.target.value;
+                    });
+                    
+                    document.getElementById('saveImageBtn').addEventListener('click', () => this.saveEditedImage(imageId));
+                }, 100);
+            }
+            
+            saveEditedImage(imageId) {
+                const newUrl = document.getElementById('editImageUrl').value.trim();
+                
+                if (!newUrl) {
+                    const errorElem = document.getElementById('editImageError');
+                    errorElem.className = 'status-message status-error';
+                    errorElem.textContent = '❌ Zəhmət olmasa şəkil URL-i daxil edin';
+                    errorElem.style.display = 'block';
+                    return;
+                }
+                
+                try {
+                    const result = this.db.updatePuzzleImage(imageId, newUrl);
+                    
+                    if (result.success) {
+                        this.closeEditImageModal();
+                        this.showMessage('✅ Şəkil uğurla yeniləndi!', 'success');
+                        this.loadAdminDashboard();
+                    } else {
+                        const errorElem = document.getElementById('editImageError');
+                        errorElem.className = 'status-message status-error';
+                        errorElem.textContent = `❌ ${result.error}`;
+                        errorElem.style.display = 'block';
+                    }
+                } catch (error) {
+                    const errorElem = document.getElementById('editImageError');
+                    errorElem.className = 'status-message status-error';
+                    errorElem.textContent = '❌ Şəkil yenilənərkən xəta baş verdi';
+                    errorElem.style.display = 'block';
+                }
+            }
+            
+            deletePuzzleImage(imageId) {
+                if (!confirm('Bu şəkili silmək istədiyinizə əminsiniz?')) {
+                    return;
+                }
+                
+                try {
+                    const result = this.db.deletePuzzleImage(imageId);
+                    
+                    if (result.success) {
+                        this.showMessage('✅ Şəkil uğurla silindi!', 'success');
+                        this.loadAdminDashboard();
+                    } else {
+                        this.showMessage(`❌ ${result.error}`, 'error');
+                    }
+                } catch (error) {
+                    this.showMessage('❌ Şəkil silinərkən xəta baş verdi', 'error');
+                }
+            }
+            
+            resetToDefaultImages() {
+                if (!confirm('BÜTÜN əlavə edilmiş şəkilləri silmək və DEFAULT şəkillərə qayıtmaq istədiyinizə əminsiniz?')) {
+                    return;
+                }
+                
+                try {
+                    const result = this.db.resetToDefaultImages();
+                    
+                    if (result.success) {
+                        this.showMessage('✅ Şəkillər default-a uğurla qaytarıldı!', 'success');
+                        this.loadAdminDashboard();
+                    } else {
+                        this.showMessage('❌ Şəkillər resetlənərkən xəta baş verdi', 'error');
+                    }
+                } catch (error) {
+                    this.showMessage('❌ Xəta baş verdi!', 'error');
+                }
+            }
+            
+            resetAllDailyPoints() {
+                if (!confirm('BÜTÜN istifadəçilərin GÜNLÜK xallarını sıfırlamaq istədiyinizə əminsiniz?')) {
+                    return;
+                }
+                
+                try {
+                    this.db.resetDailyPoints();
+                    this.showMessage('✅ Bütün günlük xallar sıfırlandı!', 'success');
+                    
+                    if (this.currentUser) {
+                        this.currentUser.dailyPoints = 0;
+                        this.saveData(CONFIG.STORAGE_KEYS.CURRENT_USER, JSON.stringify(this.currentUser));
+                    }
+                    
+                    this.loadAdminDashboard();
+                    this.updateDailyRatingTable();
+                    
+                } catch (error) {
+                    this.showMessage('❌ Xəta baş verdi!', 'error');
+                }
+            }
+            
+            // ===================== GÜNLÜK LİMİT =====================
+            checkDailyLimit() {
+                const today = new Date().toDateString();
+                
+                if (!this.dailyAttempts[today]) {
+                    this.dailyAttempts[today] = {};
+                }
+                
+                if (!this.dailyAttempts[today][this.currentUser.id]) {
+                    this.dailyAttempts[today][this.currentUser.id] = {
+                        attempts: 0,
+                        lastAttempt: null,
+                        completed: false
+                    };
+                    this.saveData(CONFIG.STORAGE_KEYS.DAILY_ATTEMPTS, this.dailyAttempts);
+                }
+                
+                const userAttempts = this.dailyAttempts[today][this.currentUser.id];
+                
+                if (userAttempts.completed) {
+                    return { 
+                        canPlay: false, 
+                        reason: "⏳ Bu gün artıq oynamısınız. Növbəti gün gözləyin!"
+                    };
+                }
+                
+                return { canPlay: true, attempts: userAttempts };
+            }
+            
+            markDailyCompleted() {
+                const today = new Date().toDateString();
+                
+                if (!this.dailyAttempts[today]) {
+                    this.dailyAttempts[today] = {};
+                }
+                
+                if (!this.dailyAttempts[today][this.currentUser.id]) {
+                    this.dailyAttempts[today][this.currentUser.id] = {
+                        attempts: 0,
+                        lastAttempt: null,
+                        completed: false
+                    };
+                }
+                
+                this.dailyAttempts[today][this.currentUser.id].completed = true;
+                this.dailyAttempts[today][this.currentUser.id].completionDate = new Date().toISOString();
+                this.saveData(CONFIG.STORAGE_KEYS.DAILY_ATTEMPTS, this.dailyAttempts);
+            }
+            
+            // ===================== ZAMAN SAYĞACLARI =====================
+            startResetTimer() {
+                this.updateNextResetDisplay();
+                // update display every minute
+                setInterval(() => this.updateNextResetDisplay(), 60000);
+
+                // schedule precise reset at next midnight
+                const scheduleNextMidnight = () => {
+                    const now = new Date();
+                    const next = new Date(now);
+                    next.setDate(now.getDate() + 1);
+                    next.setHours(0,0,0,0);
+                    const ms = next - now;
+
+                    setTimeout(() => {
+                        this.performDailyReset();
+                        // after triggering, set an interval every 24h
+                        setInterval(() => this.performDailyReset(), 24 * 60 * 60 * 1000);
+                    }, ms);
+                };
+
+                scheduleNextMidnight();
+            }
+            
+            updateNextResetDisplay() {
+                const now = new Date();
+                const tomorrow = new Date(now);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                tomorrow.setHours(0, 0, 0, 0);
+                
+                const diff = tomorrow - now;
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                document.getElementById('nextResetTime').textContent = `Sıfırlama: ${timeStr}`;
+                const resetDisplay = document.getElementById('nextResetDisplay');
+                if (resetDisplay) {
+                    resetDisplay.textContent = timeStr;
+                }
+            }
+            
+            checkDailyReset() {
+                const now = new Date();
+                const today = now.toDateString();
+                const lastReset = localStorage.getItem('last_daily_reset');
+                
+                if (lastReset !== today && now.getHours() === 0 && now.getMinutes() === 0) {
+                    this.performDailyReset();
+                }
+            }
+
+            performDailyReset() {
+                try {
+                    const today = new Date().toDateString();
+
+                    // If Firebase is enabled, reset users in Firebase
+                    if (this.firebase && this.firebase.enabled) {
+                        // Reset each user's dailyPoints in realtime DB
+                        // Note: For large user bases, this should be performed server-side.
+                        this.firebase.usersRef.once('value').then(snapshot => {
+                            snapshot.forEach(child => {
+                                const key = child.key;
+                                this.firebase.usersRef.child(key).update({ dailyPoints: 0 });
+                            });
+                        }).catch(err => console.warn('Firebase reset error:', err));
+                    }
+
+                    // Local fallback: reset local Database users
+                    this.db.resetDailyPoints();
+
+                    // Mark last reset locally
+                    localStorage.setItem('last_daily_reset', today);
+
+                    this.dailyAttempts = {};
+                    this.saveData(CONFIG.STORAGE_KEYS.DAILY_ATTEMPTS, this.dailyAttempts);
+
+                    if (this.currentUser) {
+                        this.currentUser.dailyPoints = 0;
+                        this.saveData(CONFIG.STORAGE_KEYS.CURRENT_USER, JSON.stringify(this.currentUser));
+                    }
+
+                    this.updateDailyRatingTable();
+                    this.showMessage('✅ Günlük xallar sıfırlandı! Yeni günə xoş gəldiniz!', 'success');
+                } catch (error) {
+                    console.error('performDailyReset error:', error);
+                }
+            }
+            
+            // ===================== YARDIMCI FUNKSİYALAR =====================
+            updateFormContent(html) {
+                document.getElementById('formContent').innerHTML = html;
+            }
+            
+            showMessage(text, type = 'info') {
+                const message = document.createElement('div');
+                message.className = `status-message status-${type}`;
+                message.textContent = text;
+                message.style.position = 'fixed';
+                message.style.top = '50px';
+                message.style.right = '20px';
+                message.style.zIndex = '1000';
+                message.style.minWidth = '200px';
+                message.style.maxWidth = '300px';
+                message.style.boxShadow = 'var(--shadow)';
+                
+                document.body.appendChild(message);
+                
+                setTimeout(() => {
+                    message.remove();
+                }, 3000);
+            }
+            
+            logout() {
+                if (this.currentUser) {
+                    const user = this.db.users.find(u => u.id === this.currentUser.id);
+                    if (user) {
+                        user.isOnline = false;
+                        this.db.saveData(CONFIG.STORAGE_KEYS.USERS, this.db.users);
+                    }
+                }
+                
+                this.saveData(CONFIG.STORAGE_KEYS.CURRENT_USER, null);
+                this.currentUser = null;
+                
+                document.getElementById('logoutBtn').style.display = 'none';
+                document.getElementById('adminBtn').style.display = 'none';
+                
+                this.showWelcomeScreen();
+                this.updateOnlineUsers();
+            }
+        }
+
+        // ===================== TƏTBİQİ BAŞLAT =====================
+        let app;
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                app = new PuzzleGameApp();
+                window.app = app;
+                console.log('✅ Puzzle Oyunu uğurla başladı!');
+                console.log('🖼️ Admin panelində puzzle şəkilləri idarəetməsi aktivdir!');
+            } catch (error) {
+                console.error('❌ Tətbiqi başlatma xətası:', error);
+                document.getElementById('formContent').innerHTML = `
+                    <div style="text-align:center; padding:50px 20px;">
+                        <h1 style="color:var(--danger-color);">❌ Xəta baş verdi!</h1>
+                        <p>Oyun başladıla bilmədi. Zəhmət olmasa səhifəni yeniləyin.</p>
+                        <button onclick="location.reload()" class="submit-btn" style="margin-top:20px;">
+                            🔄 Səhifəni Yenilə
+                        </button>
+                    </div>
+                `;
+            }
+        });
+        
+        // Global funksiyalar
+        window.showAdminPanel = function() {
+            if (window.app) {
+                app.showAdminPanel();
+            }
+        };
+        
+        window.editPuzzleImage = function(imageId) {
+            if (window.app) {
+                app.editPuzzleImage(imageId);
+            }
+        };
+        
+        window.deletePuzzleImage = function(imageId) {
+            if (window.app) {
+                app.deletePuzzleImage(imageId);
+            }
+        };
+    </script>
+</body>
+</html>
